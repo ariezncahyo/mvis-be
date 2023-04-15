@@ -1,4 +1,5 @@
 const { register, login, logout } = require('../controllers/auth');
+const { authAccessToken } = require('../middlewares/authToken.middleware');
 
 module.exports = (app) => {
   // API untuk mendaftar user baru
@@ -8,5 +9,5 @@ module.exports = (app) => {
   app.post('/auth/login', login);
 
   // API untuk keluar dari aplikasi
-  app.post('/auth/logout', logout);
+  app.post('/auth/logout', authAccessToken, logout);
 };

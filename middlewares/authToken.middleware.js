@@ -4,15 +4,16 @@ const response = require('../utils/response');
 
 const authAccessToken = (req, res, next) => {
   if (!req.headers.authorization) {
-    return response.forbidden('Headers authorization is empty', res);
+    return response.forbidden('No auth token', res);
   }
   const token = req.headers.authorization.split(' ')[1];
-  jwt.verify(token, config.accessSecret, (err, _) => {
+  jwt.verify(token, config.accessSecret, (err, res) => {
     if (err) {
       console.log(err);
+      req.user = null;
       return response.unauthorized(err.message, res);
     } else {
-      req.user = _
+      req.user = res;
       next();
     }
   });
@@ -34,28 +35,8 @@ const authRefreshToken = (req, res, next) => {
   });
 };
 
-const checkAccess = (accesses, isAll = false) => {
-  return (req, res, next) => {
-    const token = req.headers.authorization.split(" ")[1];
-    const tokenDecoded = jwt.decode(token);
-    const owned_accesses = tokenDecoded.accesses
-
-    const match = accesses.reduce((c, item) => owned_accesses.includes(item) ? c + 1 : c, 0)
-    if (isAll && match !== accesses.length) {
-      return response.unauthorized("User has no access", res);
-    }
-
-    if (match === 0) return response.unauthorized("User has no access", res);
-    // return response.unauthorized("User has no access", res);
-
-    // if (!owned_accesses.includes(access)) {
-    // }
-    next();
-  };
-}
 
 module.exports = {
   authAccessToken,
-  authRefreshToken,
-  checkAccess
+  authRefreshToken
 };
