@@ -51,4 +51,10 @@ db.user_like = require('./user_liked')(sequelize, Sequelize);
 db.user.hasMany(db.post, { foreignKey: 'user_id' });
 db.post.belongsTo(db.user, { foreignKey: 'user_id' });
 
+db.post.hasMany(db.user_like, { foreignKey: 'post_id'});
+db.user_like.belongsTo(db.post, { foreignKey: 'post_id'});
+
+db.user.hasMany(db.user_like, { foreignKey: 'user_id'});
+db.user_like.belongsTo(db.user, { foreignKey: 'user_id'});
+
 module.exports = db;

@@ -43,6 +43,7 @@ app.get('/', (_, res) => {
 
 routes.auth(app);
 routes.user(app);
+routes.post(app);
 
 const port = process.env.PORT || 9000;
 const host = process.env.HOST || 'localhost';
