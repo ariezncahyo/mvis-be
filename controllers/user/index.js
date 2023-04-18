@@ -71,7 +71,6 @@ module.exports.changePassword = async (req, res) => {
         console.log(req.user)
         const { public_id } = req?.user;
         const { old_password, new_password, confirm_password } = req.body;
-        let accessToken, refreshToken;
 
         const user = await db.user.findOne({
             where: { public_id: public_id }
@@ -103,18 +102,10 @@ module.exports.changePassword = async (req, res) => {
             { where: { id: user.id } }
         );
 
-        accessToken = jwt.sign({ public_id: user.public_id, name: user.name, email: user.email }, config.accessSecret, { expiresIn: config.jwtExp });
-        refreshToken = jwt.sign({ public_id: user.public_id, name: user.name, email: user.email }, config.refreshSecret,{ expiresIn: config.jwtRefreshExp });
-      
-        res.cookie("token", refreshToken, { httpOnly: true });
-
-        if (updatePassword && accessToken && refreshToken) {
-            return response.success("Successfully change password", res, {
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
+        if (updatePassword) {
+            return response.success("Successfully change password", res, {});
         } else {
-            return response.error("Failed change password", res);
+            throw new Error('Failed change password');
         }
     } catch(err) {
         console.log(err);

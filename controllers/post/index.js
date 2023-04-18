@@ -184,13 +184,45 @@ module.exports.unlikePost = async (req, res) => {
 // API untuk get list post
 module.exports.getPost = async (req, res) => {
     try {
-        const { page, limit, searchBy, search } = req.params;
+        const page = parseInt(!req.query.page ? 1 : req.query.page);
+        const page_size = parseInt(!req.query.page_size ? 5 : req.query.page_size);
+        const search = !req.query.search ? "" : req.query.search;
+        const offset = (page - 1) * page_size;
+        const limit = page_size;
 
-        const post = await db.post.findAll({
-
+        const post = await db.post.findAndCountAll({
+            include: {
+                model: db.user
+            },
+            where: {
+                [Op.or]: [
+                    {
+                      caption: {
+                        [Op.like]: "%" + search + "%",
+                      },
+                    },
+                    {
+                      tags: {
+                        [Op.like]: "%" + search + "%",
+                      },
+                    },
+                ]
+            },
+            order: [["created_at", "DESC"]],
+            distinct: true,
+            offset: offset,
+            limit: limit,
         });
-       
-        return response.success('Successfully get post', res,post, 201);
+
+        let result = {
+            data: post,
+            pagination: {
+                total: post.count,
+                page: page,
+                limit: limit
+            }
+        }
+        return response.success('Successfully get post', res,result, 201);
     } catch(err) {
         return response.error(err.message || 'Failed get post', res);
     }

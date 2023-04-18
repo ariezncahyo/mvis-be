@@ -17,11 +17,12 @@ module.exports.register = async (req, res) => {
             photo
         } = req.body;
 
+        const password_hash = await bcrypt.hash(password, 10);
         const user = await db.user.create({
             name: name,
             username: username,
             email: email,
-            password: password,
+            password: password_hash,
             photo: photo
         }, { transaction: t });
 
@@ -31,9 +32,11 @@ module.exports.register = async (req, res) => {
             email: user.email,
             photo: user.photo
         }
-
+        await t.commit();
         return response.success('Your account has been succesfully created', res, result, 201);
     } catch(err) {
+        await t.rollback();
+        console.log(err);
         return response.error(err.message || 'Failed register new user', res);
     }
 }
