@@ -208,7 +208,7 @@ module.exports.getPost = async (req, res) => {
                     },
                 ]
             },
-            order: [["created_at", "DESC"]],
+            order: [["updated_at", "desc"]],
             distinct: true,
             offset: offset,
             limit: limit,

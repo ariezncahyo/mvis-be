@@ -57,7 +57,7 @@ module.exports.uploadFile = async (req, res) => {
                 }
     
                 const result = {
-                    url: `http://localhost:9000/file/${image}`,
+                    url: `http://localhost:9000/public/file/${image}`,
                     filename: image,
                     mimetype: mimetype
                 }

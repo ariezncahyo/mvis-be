@@ -20,7 +20,7 @@ app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const GALLERY_DIR = '/public/images';
+const GALLERY_DIR = '/public/file';
 app.use(GALLERY_DIR, express.static(path.join(__dirname, GALLERY_DIR)));
 
 // db.sequelize
