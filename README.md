@@ -28,6 +28,11 @@
   - open yourhost:9000 or your setup port on env
 
 ## Deployment
+  - NVM with node v16.x.x
+    ```
+      nvm install 16
+    ```
+    
   - Nginx
   
   ```
