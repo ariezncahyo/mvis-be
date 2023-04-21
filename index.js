@@ -10,8 +10,20 @@ const seederUser = require('./seeders/user.seeder');
 
 const app = express();
 
+const whitelist = [
+  "localhost",
+  "ariezncahyo.my.id",
+  "api.ariezncahyo.my.id",
+];
+
 const corsOption = {
-  origin: true,
+  origin: (origin, callback) => {
+    if (!origin || whitelist.findIndex(i => origin.includes(i)) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 };
 
