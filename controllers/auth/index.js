@@ -66,8 +66,15 @@ module.exports.login = async (req, res) => {
           return response.forbidden("Invalid password", res);
         }
     
-        accessToken = jwt.sign({ public_id: user.public_id, name: user.name, email: user.email }, config.accessSecret, { expiresIn: config.jwtExp });
-        refreshToken = jwt.sign({ public_id: user.public_id, name: user.name, email: user.email }, config.refreshSecret,{ expiresIn: config.jwtRefreshExp });
+        let data = {
+            id: user.id,
+            public_id: user.public_id, 
+            name: user.name, 
+            email: user.email
+        }
+
+        accessToken = jwt.sign(data, config.accessSecret, { expiresIn: config.jwtExp });
+        refreshToken = jwt.sign(data, config.refreshSecret,{ expiresIn: config.jwtRefreshExp });
       
         res.cookie("token", refreshToken, { httpOnly: true });
 

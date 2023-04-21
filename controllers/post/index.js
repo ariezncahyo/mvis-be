@@ -141,39 +141,33 @@ module.exports.unlikePost = async (req, res) => {
         const { post_id } = req.params;
         const user_id = req.user.public_id;
 
-        try {
-            const userLiked = await db.user_like.destroy({
-                where: { id: 1 },
-                truncate: true
-            });
+        let post = await db.post.findOne({
+            where: {
+                public_id: post_id
+            }
+        });
+        if (!post) return response.success('Data not found', res,{}, 200);
 
-            console.log(userLiked)
-        } catch(err) {
-            console.log(err)
-        }
-    
-        
-        // const post = await db.post.findOne({
-        //     where: { public_id: post_id }
-        // });
-        // if (!post) return response.error('Data not found', res);
+        let user = await db.user.findOne({ 
+            where: {
+                public_id: user_id
+            }
+        });
+        if (!user) return response.success('User not found', res,{}, 200);
 
-        // const user = await db.user.findOne({
-        //     where: { public_id: user_id }
-        // });
-        // if (!user) return response.error('Invalid user', res);
+        let destroy_like = await db.user_like.destroy({
+            where: {
+                [Op.and] : {
+                    post_id: post.id,
+                    user_id: user.id
+                }
+            }
+        });
 
-        // const userLiked = await db.user_like.destroy({
-        //     where: {},
-        //     truncate: true
-        // });
+        const post_unlike = await db.post.decrement('likes', {by: 1, where: { public_id: post_id }});
+        if (!destroy_like || !post_unlike) return response.error('Failed unlike post');
 
-        // const postLiked = await db.post.decrement('likes', {by: 1, where: { public_id: post_id }});
-        
-        // if (!postLiked || !userLiked) {
-        //     throw new Error('Failed unliked post');
-        // }
-
+        if (!destroy_like) return response.success('Failed unlike post', res,{}, 200);
         return response.success('Successfully unliked post', res,{}, 201);
     } catch(err) {
         console.log(err);
@@ -185,14 +179,17 @@ module.exports.unlikePost = async (req, res) => {
 module.exports.getPost = async (req, res) => {
     try {
         const page = parseInt(!req.query.page ? 1 : req.query.page);
-        const page_size = parseInt(!req.query.page_size ? 5 : req.query.page_size);
+        const page_size = parseInt(!req.query.page_size ? 8 : req.query.page_size);
         const search = !req.query.search ? "" : req.query.search;
         const offset = (page - 1) * page_size;
         const limit = page_size;
 
-        const post = await db.post.findAndCountAll({
+        let post = await db.post.findAndCountAll({
             include: {
                 model: db.user
+            },
+            include: {
+                model: db.user_like
             },
             where: {
                 [Op.or]: [
@@ -208,11 +205,13 @@ module.exports.getPost = async (req, res) => {
                     },
                 ]
             },
-            order: [["updated_at", "desc"]],
+            order: [["created_at", "desc"]],
             distinct: true,
             offset: offset,
             limit: limit,
         });
+
+        post.user_active = req?.user?.id;
 
         let result = {
             data: post,
